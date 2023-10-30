@@ -1,0 +1,9 @@
+face_recognition
+numpy
+datetime
+os
+cv2
+keyboard
+pyautogui
+customtkinter
+tkinter
