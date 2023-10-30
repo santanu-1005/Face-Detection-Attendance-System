@@ -1,0 +1,1 @@
+ncodeList.append(face_recognition.face_encodings(images[-1])[0])
