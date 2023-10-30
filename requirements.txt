@@ -1,9 +1,7 @@
-face_recognition
+face-recognition
 numpy
 datetime
-os
-cv2
+opencv-python
 keyboard
 pyautogui
 customtkinter
-tkinter
