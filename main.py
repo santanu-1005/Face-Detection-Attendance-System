@@ -1,3 +1,5 @@
+# ==============================Importing Libraries================================================= #
+
 import face_recognition
 import numpy as np
 from datetime import datetime
@@ -9,17 +11,13 @@ import customtkinter as cstk
 import tkinter as tk
 from tkinter import filedialog, PhotoImage
 
+# =======================================Paths===================================================== #
+
 path = "ImagesAttendance"
 only_name = r"only_name"
 attend_csv_path = r"Attendance.csv"
-# GUIIIII
-cstk.set_appearance_mode("dark")
-cstk.set_default_color_theme("green")
-root = cstk.CTk()
-root.geometry("1320x720")
-root.title("Facial Recognition System")
 
-# create the needed variables
+# ========================================Variables=============================================== #
 
 images = []  #  img to numpy array
 global image_names
@@ -36,8 +34,8 @@ print(mylist)
 global del_names,del_ind
 del_names=[]
 del_ind=[]
-# accessing images in folder
 
+# =======================================Accessing Image========================================== #
 
 def access():
     global images,image_names
@@ -48,24 +46,18 @@ def access():
     print(image_names)
     image_names2 = image_names[:]
 
-
 def clean():
     for f in os.listdir(only_name):
         os.remove(fr"{only_name}\{f}")
 
+# ================================Save the Captured Image========================================= #
 
-# return the 128-dimension face encoding for each face in the image.
-# A face encoding is basically a way to represent the face using a set of 128 computer-generated measurements.
-# Two different pictures of the same person would have similar encoding and
-# two different people would have totally different encoding
+def save_img(imagesz,nami):
+    savedImg=os.listdir(only_name)
+    if nami not in savedImg:
+        cv2.imwrite(rf"{only_name}+\{nami}.jpg", imagesz)
 
-
-# def find_encodings(images):
-#     for image in images:
-#         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#         encode = face_recognition.face_encodings(image)[0]
-#         encodeList.append(encode)
-#     return encodeList
+# =========================================Image Encoding========================================== #
 
 def find_encodings(images):
     encodeList = []
@@ -79,15 +71,8 @@ def find_encodings(images):
             print("No face detected in the image.")
     return encodeList
 
+# =======================================Marking Attendance======================================= #
 
-# to save the captured image
-def save_img(imagesz,nami):
-    savedImg=os.listdir(only_name)
-    if nami not in savedImg:
-        cv2.imwrite(rf"{only_name}+\{nami}.jpg", imagesz)
-
-
-# to mark the attendace into txt file for a new name
 def markAttendance(name):
     print(name, "attended")
 
@@ -109,6 +94,7 @@ def markAttendance(name):
             dtString = now.strftime("%I:%M %p")  # I - 12 hr format() , minute , pm or am
             attend_dict[name][1]=dtString
 
+# ===============================================Camera Analysis================================== #
 
 def webcam_scan():
     cap = cv2.VideoCapture(0) # starts video capture through webcam
@@ -124,7 +110,7 @@ def webcam_scan():
         facesCurFrame = face_recognition.face_locations(imgS)
         encodesCurFrame = face_recognition.face_encodings(imgS,facesCurFrame)
 
-        # displays a text below                         no               co ordi where tot          font                colour    size
+        # displays a text below  no               co ordi where tot          font                colour    size
         cv2.putText(img,f'Number of faces detected: {len(facesCurFrame)}', (100, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
 
         # main 
@@ -176,8 +162,8 @@ def webcam_scan():
             break
 
 
+# ============================================Attendance on File============================================== #
 
-# mark attendance
 def attendance():
     ff = open("Attendance.csv", 'w+')
     ss = ""
@@ -206,36 +192,7 @@ def attendance():
     ff.close()
     os.startfile(r"Attendance.csv")
 
-
-# take a new pic from webcam
-def take_a_pic():
-    new_name = pyautogui.prompt('What is your name?',title="Name",default="new_image")
-
-    if new_name in del_names:
-        loc=del_ind[del_names.index(new_name)]
-        image_names[loc]=new_name
-
-        new_name += ".jpg"
-        tk.messagebox.showinfo("Alert", "Look at the Camera in 3 sec !")
-        result, new_img = cv2.VideoCapture(0).read()
-        cv2.imwrite(rf"ImagesAttendance\{new_name}", new_img)
-        cv2.imshow("New Image", new_img)
-        cv2.waitKey(0)
-        cv2.destroyWindow('New Image')
-
-    else:
-        new_name+= ".jpg"
-        tk.messagebox.showinfo("Alert", "Look at the Camera in 3 sec !")
-        result, new_img = cv2.VideoCapture(0).read()
-        cv2.imwrite(rf"ImagesAttendance\{new_name}",new_img)
-        cv2.imshow("New Image",new_img)
-        cv2.waitKey(0)
-        cv2.destroyWindow('New Image')
-
-        images.append(cv2.imread(fr'ImagesAttendance\{new_name}'))
-        image_names.append(os.path.splitext(new_name)[0])
-        print(os.path.splitext(new_name)[0])
-        encodeList.append(face_recognition.face_encodings(images[-1])[0])
+# ===================================================Delete Picture=========================================== #
 
 
 def open_images_to_delete():
@@ -263,41 +220,40 @@ def open_images_to_delete():
         removed_names += j + " , "
     tk.messagebox.showinfo("showinfo", f"Faces removed = {len(set_dif)}\n{removed_names}\nClose the Window")
 
+# =========================================================GUI=================================================#
 
 def delete_a_face():
     root1 = tk.Toplevel()
     root1.geometry("600x600")
     root1.title("delete")
-    image2 = PhotoImage(file=r'C:\Users\santa\Downloads\Telegram Desktop\Face_Recognition-main\other_files\delete.png')
+    image2 = PhotoImage(file=r'other_files\delete.png')
     bg1label = tk.Label(root1, image=image2, width=300, height=180)
     bg1label.pack()
     button9 = tk.Button(root1, text="Select the images", command=open_images_to_delete, width=300,pady=5)
     button9.pack()
     root1.mainloop()
 
-
 def show():
     os.startfile(r"only_name")
-
 
 def know_faces():
     os.startfile(r"ImagesAttendance")
 
-
 def about():
-    os.startfile(r"C:\Users\santa\Downloads\Telegram Desktop\Face_Recognition-main\other_files\ABOUT OURSELVES.png")
-
-#############----Mainn-------#############
-
+    os.startfile(r"other_files\last.png")
 
 clean() # empty the known images folder
 access() # get the names of images
 encodeListKnown = find_encodings(images) # encode all the images
 print("Encoding Completed..")
 
-# GUIIIII
+cstk.set_appearance_mode("dark")
+cstk.set_default_color_theme("green")
+root = cstk.CTk()
+root.geometry("1320x720")
+root.title("Facial Recognition System")
 
-imag = tk.PhotoImage(file=r"C:\Users\santa\Downloads\Telegram Desktop\Face_Recognition-main\other_files\bg4.png")
+imag = tk.PhotoImage(file=r"C:\Users\santa\OneDrive\Desktop\Minor-sem5\other_files\bg4.png")
 
 frame = cstk.CTkFrame(master=root)
 frame.pack(padx=60,pady=20,fill="both",expand=True)
@@ -311,23 +267,16 @@ bglabel.pack()
 button1 = cstk.CTkButton(master=frame, text="Scan face (Webcam)", command=webcam_scan, height=80, width=250, font=("Arial", 24))
 button1.place(relx=0.3, rely=0.3, anchor="e")
 
-button4 = cstk.CTkButton(master=frame,text="Known Images",command=know_faces,height=80,width=250,font=("Arial",24))
-button4.place(relx=0.75,rely=0.3,anchor="w")
+button2 = cstk.CTkButton(master=frame,text="Known Images",command=know_faces,height=80,width=250,font=("Arial",24))
+button2.place(relx=0.75,rely=0.3,anchor="w")
 
-# button5 = cstk.CTkButton(master=frame,text="Add a new face",command=take_a_pic,height=80,width=250,font=("Arial",24))
-# button5.place(relx=0.3,rely=0.57,anchor="e")
+button3 = cstk.CTkButton(master=frame,text="Delete a face",command=delete_a_face,height=80,width=250,font=("Arial",24))
+button3.place(relx=0.75,rely=0.85,anchor="w")
 
-button6 = cstk.CTkButton(master=frame,text="Delete a face",command=delete_a_face,height=80,width=250,font=("Arial",24))
-button6.place(relx=0.75,rely=0.85,anchor="w")
+button4 = cstk.CTkButton(master=frame,text="About",command=about,height=80,width=250,font=("Arial",24))
+button4.place(relx=0.3,rely=0.85,anchor="e")
 
-button3 = cstk.CTkButton(master=frame,text="About",height=80,width=250,font=("Arial",24))
-button3.place(relx=0.3,rely=0.85,anchor="e")
-
-# button2 = cstk.CTkButton(master=frame,text="Show Scanned Images",command=show,height=80,width=250,font=("Arial",24))
-# button2.place(relx=0.75,rely=0.85,anchor="w")
-
-button7 = cstk.CTkButton(master=frame,text="Open Attendance",command=attendance,height=80,width=250,font=("Arial",24))
-button7.place(relx=0.52,rely=0.5,anchor="center")
+button5 = cstk.CTkButton(master=frame,text="Open Attendance",command=attendance,height=80,width=250,font=("Arial",24))
+button5.place(relx=0.52,rely=0.5,anchor="center")
 
 root.mainloop()
-
